@@ -7,6 +7,7 @@ const createFanIn = (...asyncGenerator) => {
     const promise = iterator.next()
     pool.add(promise)
     promise.then(({ value, done }) => {
+      // TODO: handle error and done is true
       valuePool.push(value)
       generatorPool.push(iterator)
       pool.delete(promise)
