@@ -25,8 +25,11 @@ const createFanIn = (...asyncIterators) => {
         try {
           await Promise.race([...pool])
           const val = valuePool.shift()
-          if (val !== undefined) yield val // filter end of function (undefined) returned
-          addSource(generatorPool.shift())
+          if (val !== undefined) {
+            yield val
+          }
+          const i = generatorPool.shift()
+          if (i) addSource(i)
         } catch (error) {
           console.log(`Iterator has error occurs ${totalLive}`,error) // eslint-disable-line
           totalLive--
