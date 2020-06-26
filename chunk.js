@@ -17,7 +17,6 @@ const getChuck = size =>
       yield valid
       if (valid.length !== size) break
     }
-    // work
   }
 
 module.exports = {
