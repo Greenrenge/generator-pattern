@@ -21,7 +21,7 @@ const createFanIn = (...asyncGenerator) => {
 
   return {
     async *fanInGenerator() {
-      asyncGenerator.forEach(a => addSource(a()))
+      asyncGenerator.forEach(a => addSource(a))
       while (true) {
         const isDone = await Promise.race([...pool])
         yield valuePool.shift()
