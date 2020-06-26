@@ -11,6 +11,9 @@ const createFanIn = (...asyncIterators) => {
       .then(({ value, done }) => {
         valuePool.push(value)
         if (!done) generatorPool.push(iterator)
+        else {
+          totalLive--
+        }
         pool.delete(promise)
       })
       .catch(() => {
@@ -33,8 +36,8 @@ const createFanIn = (...asyncIterators) => {
         } catch (error) {
           console.log(`Iterator has error occurs ${totalLive}`,error) // eslint-disable-line
           totalLive--
-          if (totalLive <= 0) break
         }
+        if (totalLive <= 0) break
       }
     },
   }
