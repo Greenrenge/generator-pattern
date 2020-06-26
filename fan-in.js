@@ -1,4 +1,4 @@
-const createFanIn = (...asyncGenerator) => {
+const createFanIn = (...asyncIterators) => {
   const valuePool = []
   const generatorPool = []
   const pool = new Set()
@@ -7,7 +7,6 @@ const createFanIn = (...asyncGenerator) => {
     const promise = iterator.next()
     promise
       .then(({ value, done }) => {
-        // TODO: handle error and done is true
         valuePool.push(value)
         if (!done) generatorPool.push(iterator)
         pool.delete(promise)
@@ -21,7 +20,7 @@ const createFanIn = (...asyncGenerator) => {
 
   return {
     async *fanInGenerator() {
-      asyncGenerator.forEach(a => addSource(a))
+      asyncIterators.forEach(a => addSource(a))
       while (true) {
         const isDone = await Promise.race([...pool])
         yield valuePool.shift()
