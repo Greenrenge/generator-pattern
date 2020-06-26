@@ -3,24 +3,29 @@ const createFanIn = (...asyncGenerator) => {
   const generatorPool = []
   const pool = new Set()
 
-  const addSource = async function (iterator) {
+  const addSource = async function(iterator) {
     const promise = iterator.next()
+    promise
+      .then(({ value, done }) => {
+        // TODO: handle error and done is true
+        valuePool.push(value)
+        if (!done) generatorPool.push(iterator)
+        pool.delete(promise)
+        return done
+      })
+      .catch(() => {
+        return true
+      })
     pool.add(promise)
-    promise.then(({ value, done }) => {
-      // TODO: handle error and done is true
-      valuePool.push(value)
-      generatorPool.push(iterator)
-      pool.delete(promise)
-    })
   }
 
   return {
-    fanInGenerator: async function* () {
-      asyncGenerator.forEach((a) => addSource(a()))
+    async *fanInGenerator() {
+      asyncGenerator.forEach(a => addSource(a()))
       while (true) {
-        await Promise.race([...pool])
+        const isDone = await Promise.race([...pool])
         yield valuePool.shift()
-        addSource(generatorPool.shift())
+        if (!isDone) addSource(generatorPool.shift())
       }
     },
   }
