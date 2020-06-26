@@ -4,7 +4,7 @@ const createFanIn = (...asyncIterators) => {
   const pool = new Set()
   let totalLive = asyncIterators.length
 
-  const addSource = async function(iterator) {
+  const addSource = function(iterator) {
     const promise = iterator.next()
     pool.add(promise)
     promise
@@ -24,10 +24,11 @@ const createFanIn = (...asyncIterators) => {
       while (true) {
         try {
           await Promise.race([...pool])
-          yield valuePool.shift()
-          await addSource(generatorPool.shift())
+          const val = valuePool.shift()
+          if (val !== undefined) yield val // filter end of function (undefined) returned
+          addSource(generatorPool.shift())
         } catch (error) {
-          console.log("Iterator has error occurs",error) // eslint-disable-line
+          console.log(`Iterator has error occurs ${totalLive}`,error) // eslint-disable-line
           totalLive--
           if (totalLive <= 0) break
         }
